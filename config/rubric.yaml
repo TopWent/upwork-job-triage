@@ -1,0 +1,58 @@
+min_spend: 1000.0
+min_hire_rate: 0.5
+max_proposals: 15
+max_age_minutes: 360
+min_hourly: 25.0
+min_fixed: 300.0
+require_payment_verified: true
+
+target_hourly: 55.0
+
+w_skill: 35
+w_client: 25
+w_competition: 20
+w_recency: 10
+w_budget: 10
+
+skills:
+  - go
+  - golang
+  - python
+  - php
+  - laravel
+  - symfony
+  - fastapi
+  - claude
+  - anthropic
+  - openai
+  - llm
+  - rag
+  - embedding
+  - vector
+  - clickhouse
+  - postgresql
+  - kafka
+  - redis
+  - docker
+  - microservice
+  - api
+  - backend
+  - mcp
+  - sentence-transformers
+  - faiss
+  - onnx
+
+blocklist:
+  - wordpress
+  - drupal
+  - joomla
+  - magento
+  - shopify
+  - wix
+  - webflow
+  - elementor
+  - prestashop
+  - opencart
+  - squarespace
+  - godaddy
+  - bitrix

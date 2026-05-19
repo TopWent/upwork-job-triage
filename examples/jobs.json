@@ -1,0 +1,50 @@
+[
+  {
+    "id": "~01a",
+    "title": "Claude API integration for our Laravel 11 app",
+    "description": "We run a Laravel 11 SaaS and want an AI assistant that answers from our docs. Need RAG and a clean PHP integration.",
+    "skills": ["PHP", "Laravel", "Anthropic", "RAG"],
+    "budget_type": "hourly",
+    "budget_min": 45,
+    "budget_max": 75,
+    "proposals": 4,
+    "posted_ago_minutes": 30,
+    "client_payment_verified": true,
+    "client_total_spend": 22000,
+    "client_hire_rate": 0.78,
+    "client_country": "United States",
+    "url": "https://www.upwork.com/jobs/~01a"
+  },
+  {
+    "id": "~01b",
+    "title": "Go microservice for high-throughput quote processing",
+    "description": "Crypto exchange backend, need a Go service for quote ingestion and state sync. ClickHouse for analytics.",
+    "skills": ["Go", "ClickHouse", "Microservices"],
+    "budget_type": "fixed",
+    "budget_min": 2500,
+    "budget_max": 2500,
+    "proposals": 9,
+    "posted_ago_minutes": 120,
+    "client_payment_verified": true,
+    "client_total_spend": 60000,
+    "client_hire_rate": 0.65,
+    "client_country": "Singapore",
+    "url": "https://www.upwork.com/jobs/~01b"
+  },
+  {
+    "id": "~01c",
+    "title": "WordPress theme tweaks",
+    "description": "Small CSS and layout changes on a WordPress site.",
+    "skills": ["WordPress", "CSS"],
+    "budget_type": "fixed",
+    "budget_min": 120,
+    "budget_max": 120,
+    "proposals": 35,
+    "posted_ago_minutes": 800,
+    "client_payment_verified": false,
+    "client_total_spend": 0,
+    "client_hire_rate": 0.0,
+    "client_country": "India",
+    "url": "https://www.upwork.com/jobs/~01c"
+  }
+]

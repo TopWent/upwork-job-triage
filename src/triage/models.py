@@ -1,3 +1,5 @@
+"""Input/output schemas. Job is what comes off the Upwork JSON dump."""
+
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
@@ -15,15 +17,15 @@ class Job(BaseModel):
     skills: list[str] = Field(default_factory=list)
 
     budget_type: BudgetType
-    budget_min: float = 0.0
-    budget_max: float = 0.0
+    budget_min: float = Field(default=0.0, ge=0)
+    budget_max: float = Field(default=0.0, ge=0)
 
-    proposals: int = 0
-    posted_ago_minutes: int = 0
+    proposals: int = Field(default=0, ge=0)
+    posted_ago_minutes: int = Field(default=0, ge=0)
 
     client_payment_verified: bool = False
-    client_total_spend: float = 0.0
-    client_hire_rate: float = 0.0
+    client_total_spend: float = Field(default=0.0, ge=0)
+    client_hire_rate: float = Field(default=0.0, ge=0, le=1)
     client_country: str = ""
 
     url: str = ""

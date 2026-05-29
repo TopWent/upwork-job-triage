@@ -33,3 +33,25 @@ def test_load_rejects_unknown_keys(tmp_path):
 def test_load_missing_file_raises(tmp_path):
     with pytest.raises(OSError):
         Rubric.load(tmp_path / "nope.yaml")
+
+
+def test_load_rejects_wrong_typed_value(tmp_path):
+    p = tmp_path / "r.yaml"
+    p.write_text('max_proposals: "not a number"\n', encoding="utf-8")
+    with pytest.raises(ValueError, match="max_proposals"):
+        Rubric.load(p)
+
+
+def test_load_coerces_int_to_float(tmp_path):
+    p = tmp_path / "r.yaml"
+    p.write_text("min_spend: 5000\n", encoding="utf-8")
+    r = Rubric.load(p)
+    assert r.min_spend == 5000.0
+    assert isinstance(r.min_spend, float)
+
+
+def test_load_rejects_bad_skill_list(tmp_path):
+    p = tmp_path / "r.yaml"
+    p.write_text("skills:\n  - python\n  - 123\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="skills"):
+        Rubric.load(p)

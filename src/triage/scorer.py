@@ -1,3 +1,9 @@
+"""Deterministic Upwork job filter and scorer.
+
+Hard-reject gates first, then a weighted 0-100 score on whatever survives.
+No LLM, no network. Same job + same rubric always gives the same number.
+"""
+
 from __future__ import annotations
 
 import re
@@ -5,11 +11,23 @@ import re
 from .models import BudgetType, Job, ScoredJob, Verdict
 from .rubric import Rubric
 
-_WORD = re.compile(r"[a-z0-9+#.-]+")
+# A "chunk" is a run of letters/digits plus the few tech punctuation chars we
+# care about keeping (c++, c#, .net). We then split each chunk on dots and
+# hyphens so a domain like wordpress.com also yields the bare word "wordpress".
+_CHUNK = re.compile(r"[a-z0-9+#.-]+")
 
 
 def _tokens(text: str) -> set[str]:
-    return set(_WORD.findall(text.lower()))
+    out: set[str] = set()
+    for chunk in _CHUNK.findall(text.lower()):
+        out.add(chunk)
+        # Also index the dotted/hyphenated parts so "wordpress" falls out of
+        # "wordpress.com" and trailing punctuation ("wordpress.") drops off.
+        # node.js / sentence-transformers still survive as the whole chunk.
+        for part in re.split(r"[.-]", chunk):
+            if part:
+                out.add(part)
+    return out
 
 
 def hard_reject(job: Job, r: Rubric) -> str | None:
@@ -36,11 +54,19 @@ def hard_reject(job: Job, r: Rubric) -> str | None:
 
 
 def _blocklisted(job: Job, r: Rubric) -> str | None:
-    haystack = _tokens(job.title) | _tokens(job.description)
+    tokens = _tokens(job.title) | _tokens(job.description)
     for s in job.skills:
-        haystack |= _tokens(s)
+        tokens |= _tokens(s)
+    raw = " ".join([job.title, job.description, *job.skills]).lower()
     for term in r.blocklist:
-        if term.lower() in haystack:
+        term = term.lower()
+        # Multi-word terms ("go high level") can't live in the token set, so
+        # match those as a phrase against the raw text. Single words match
+        # token-wise to avoid "react" firing inside "reactor".
+        if " " in term:
+            if term in raw:
+                return term
+        elif term in tokens:
             return term
     return None
 
@@ -92,6 +118,7 @@ def _budget_score(job: Job, r: Rubric) -> int:
 
 
 def score_job(job: Job, r: Rubric) -> ScoredJob:
+    """Reject on the hard gates, else return a 0-100 score with subscores."""
     rejection = hard_reject(job, r)
     if rejection is not None:
         return ScoredJob(job=job, verdict=Verdict.REJECT, score=0, reason=rejection)
@@ -110,6 +137,7 @@ def score_job(job: Job, r: Rubric) -> ScoredJob:
 
 
 def triage(jobs: list[Job], r: Rubric, min_score: int = 0) -> list[ScoredJob]:
+    """Score every job, keep the takes at or above min_score, best first."""
     scored = [score_job(j, r) for j in jobs]
     taken = [s for s in scored if s.verdict == Verdict.TAKE and s.score >= min_score]
     taken.sort(key=lambda s: s.score, reverse=True)

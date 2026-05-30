@@ -61,9 +61,7 @@ def test_reject_low_hourly():
 
 
 def test_reject_low_fixed():
-    msg = hard_reject(
-        good_job(budget_type=BudgetType.FIXED, budget_min=100, budget_max=100), R
-    )
+    msg = hard_reject(good_job(budget_type=BudgetType.FIXED, budget_min=100, budget_max=100), R)
     assert "fixed" in msg
 
 
@@ -103,6 +101,48 @@ def test_reject_cms_even_with_matching_skill_keyword():
         R,
     )
     assert msg == "blocked term: shopify"
+
+
+def test_reject_cms_when_glued_to_a_domain():
+    # The word is only present as part of a domain. Old tokenizer kept
+    # "wordpress.com" as one token and the blocklist never fired.
+    msg = hard_reject(
+        good_job(
+            title="Migrate our site",
+            description="Everything lives on wordpress.com and we want it moved.",
+            skills=["Python"],
+        ),
+        R,
+    )
+    assert msg == "blocked term: wordpress"
+
+
+def test_multiword_blocklist_phrase_matches():
+    r = Rubric(blocklist=["go high level"])
+    # "go" alone is a real skill, so this must match the whole phrase, not "go".
+    msg = hard_reject(
+        good_job(
+            title="Need a Go High Level funnel built",
+            description="GHL automation, no real backend.",
+            skills=["Python"],
+        ),
+        r,
+    )
+    assert msg == "blocked term: go high level"
+
+
+def test_dotted_skill_token_still_matches():
+    # node.js must still register as an overlapping skill, not get swallowed.
+    r = Rubric(skills=["node.js"], blocklist=[])
+    s = score_job(
+        good_job(
+            title="Build a Node.js service",
+            description="Plain node.js backend work.",
+            skills=["Node.js"],
+        ),
+        r,
+    )
+    assert s.verdict is Verdict.TAKE
 
 
 def test_score_monotonic_in_competition():
